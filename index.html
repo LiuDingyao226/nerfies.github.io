@@ -1,7 +1,5 @@
 <!DOCTYPE html>
 <html>
-<script defer src="https://cdn.jsdelivr.net/npm/img-comparison-slider@8/dist/index.js"></script>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/img-comparison-slider@8/dist/styles.css" />
 <head>
   <meta charset="utf-8">
   <meta name="description"
@@ -10,7 +8,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Nerfies: Deformable Neural Radiance Fields</title>
 
-  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script defer src="https://cdn.jsdelivr.net/npm/img-comparison-slider@8/dist/index.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/img-comparison-slider@8/dist/styles.css" />
+
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-PYVRSFMDRL"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
@@ -41,6 +41,31 @@
   <script src="./static/js/bulma-carousel.min.js"></script>
   <script src="./static/js/bulma-slider.min.js"></script>
   <script src="./static/js/index.js"></script>
+
+  <style>
+    /* 1. 保证视频不被截断，自适应高度 */
+    .comparison-container video {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    /* 2. 手柄样式设计：磨砂白圆圈 + 阴影，专业且不花哨 */
+    .custom-handle {
+      width: 40px;
+      height: 40px;
+      background: rgba(255, 255, 255, 0.9); /* 半透明白色背景 */
+      border-radius: 50%; /* 圆形 */
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4); /* 柔和阴影，增加立体感 */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #4a4a4a; /* 箭头颜色：深灰，比纯黑更高级 */
+      cursor: col-resize; /* 鼠标放上去显示左右拖动图标 */
+    }
+
+    /* 如果你需要箭头图标是纯CSS画的，可以用下面的svg替代，这里为了代码简洁直接用svg slot */
+  </style>
 </head>
 <body>
 
@@ -120,7 +145,6 @@
 
           <div class="column has-text-centered">
             <div class="publication-links">
-              <!-- PDF Link. -->
               <span class="link-block">
                 <a href="https://arxiv.org/pdf/2011.12948"
                    class="external-link button is-normal is-rounded is-dark">
@@ -139,7 +163,6 @@
                   <span>arXiv</span>
                 </a>
               </span>
-              <!-- Video Link. -->
               <span class="link-block">
                 <a href="https://www.youtube.com/watch?v=MrKrnHhk8IA"
                    class="external-link button is-normal is-rounded is-dark">
@@ -149,7 +172,6 @@
                   <span>Video</span>
                 </a>
               </span>
-              <!-- Code Link. -->
               <span class="link-block">
                 <a href="https://github.com/google/nerfies"
                    class="external-link button is-normal is-rounded is-dark">
@@ -159,7 +181,6 @@
                   <span>Code</span>
                   </a>
               </span>
-              <!-- Dataset Link. -->
               <span class="link-block">
                 <a href="https://github.com/google/nerfies/releases/tag/0.1"
                    class="external-link button is-normal is-rounded is-dark">
@@ -261,22 +282,31 @@
           <p>拖动中间的滑块来对比白膜(Left)和上色结果(Right)。</p>
         </div>
 
-        <div class="comparison-container" style="width: 100%; aspect-ratio: 16/9; position: relative; overflow: hidden; border-radius: 10px;">
+        <div class="comparison-container" style="width: 100%; border-radius: 10px; overflow: hidden; box-shadow: 0 0 15px rgba(0,0,0,0.1);">
           
-          <img-comparison-slider style="width: 100%; height: 100%;">
-            <figure slot="first" class="before" style="margin:0; width:100%; height:100%;">
-              <video id="video-left" width="100%" height="100%" autoplay loop muted playsinline style="object-fit: cover;">
+          <img-comparison-slider>
+            
+            <figure slot="first" class="before" style="margin:0; width:100%;">
+              <video id="video-left" autoplay loop muted playsinline style="width: 100%; height: auto;">
                 <source src="./static/videos/render_rgb.mp4" type="video/mp4">
               </video>
-              <figcaption style="position: absolute; top: 10px; left: 10px; color: white; background: rgba(0,0,0,0.5); padding: 5px; border-radius: 5px;">Input</figcaption>
+              <figcaption style="position: absolute; top: 10px; left: 10px; color: white; background: rgba(0,0,0,0.6); padding: 4px 10px; border-radius: 4px; font-size: 14px;">Input</figcaption>
             </figure>
         
-            <figure slot="second" class="after" style="margin:0; width:100%; height:100%;">
-              <video id="video-right" width="100%" height="100%" autoplay loop muted playsinline style="object-fit: cover;">
+            <figure slot="second" class="after" style="margin:0; width:100%;">
+              <video id="video-right" autoplay loop muted playsinline style="width: 100%; height: auto;">
                 <source src="./static/videos/render_rgb2.mp4" type="video/mp4">
               </video>
-              <figcaption style="position: absolute; top: 10px; right: 10px; color: white; background: rgba(0,0,0,0.5); padding: 5px; border-radius: 5px;">Ours</figcaption>
+              <figcaption style="position: absolute; top: 10px; right: 10px; color: white; background: rgba(0,0,0,0.6); padding: 4px 10px; border-radius: 4px; font-size: 14px;">Ours</figcaption>
             </figure>
+
+            <div slot="handle" class="custom-handle">
+              <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+                <path d="M7.41,15.41L12,10.83L16.59,15.41L18,14L12,8L6,14L7.41,15.41Z" transform="rotate(-90 12 12) translate(0 1)"/>
+                <path d="M7.41,15.41L12,10.83L16.59,15.41L18,14L12,8L6,14L7.41,15.41Z" transform="rotate(90 12 12) translate(0 -1)"/>
+              </svg>
+            </div>
+
           </img-comparison-slider>
 
         </div>
@@ -289,8 +319,10 @@
   const vLeft = document.getElementById('video-left');
   const vRight = document.getElementById('video-right');
   if(vLeft && vRight){
+      // 确保两个视频状态同步
       vLeft.addEventListener('play', () => vRight.play());
       vLeft.addEventListener('pause', () => vRight.pause());
+      // 进度同步校准
       vLeft.addEventListener('timeupdate', () => {
         if (Math.abs(vLeft.currentTime - vRight.currentTime) > 0.1) {
           vRight.currentTime = vLeft.currentTime;
@@ -305,7 +337,6 @@
 
     <div class="columns is-centered">
 
-      <!-- Visual Effects. -->
       <div class="column">
         <div class="content">
           <h2 class="title is-3">Visual Effects</h2>
@@ -319,9 +350,6 @@
           </video>
         </div>
       </div>
-      <!--/ Visual Effects. -->
-
-      <!-- Matting. -->
       <div class="column">
         <h2 class="title is-3">Matting</h2>
         <div class="columns is-centered">
@@ -339,14 +367,10 @@
         </div>
       </div>
     </div>
-    <!--/ Matting. -->
-
-    <!-- Animation. -->
     <div class="columns is-centered">
       <div class="column is-full-width">
         <h2 class="title is-3">Animation</h2>
 
-        <!-- Interpolating. -->
         <h3 class="title is-4">Interpolating states</h3>
         <div class="content has-text-justified">
           <p>
@@ -378,9 +402,6 @@
           </div>
         </div>
         <br/>
-        <!--/ Interpolating. -->
-
-        <!-- Re-rendering. -->
         <h3 class="title is-4">Re-rendering the input video</h3>
         <div class="content has-text-justified">
           <p>
@@ -399,14 +420,8 @@
                     type="video/mp4">
           </video>
         </div>
-        <!--/ Re-rendering. -->
-
-      </div>
+        </div>
     </div>
-    <!--/ Animation. -->
-
-
-    <!-- Concurrent Work. -->
     <div class="columns is-centered">
       <div class="column is-full-width">
         <h2 class="title is-3">Related Links</h2>
@@ -431,9 +446,7 @@
         </div>
       </div>
     </div>
-    <!--/ Concurrent Work. -->
-
-  </div>
+    </div>
 </section>
 
 
