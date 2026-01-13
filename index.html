@@ -14,25 +14,17 @@
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-PYVRSFMDRL"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
-
-    function gtag() {
-      dataLayer.push(arguments);
-    }
-
+    function gtag() { dataLayer.push(arguments); }
     gtag('js', new Date());
-
     gtag('config', 'G-PYVRSFMDRL');
   </script>
 
-  <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro"
-        rel="stylesheet">
-
+  <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro" rel="stylesheet">
   <link rel="stylesheet" href="./static/css/bulma.min.css">
   <link rel="stylesheet" href="./static/css/bulma-carousel.min.css">
   <link rel="stylesheet" href="./static/css/bulma-slider.min.css">
   <link rel="stylesheet" href="./static/css/fontawesome.all.min.css">
-  <link rel="stylesheet"
-        href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
   <link rel="stylesheet" href="./static/css/index.css">
   <link rel="icon" href="./static/images/favicon.svg">
 
@@ -43,70 +35,90 @@
   <script src="./static/js/index.js"></script>
 
   <style>
-    /* ========================================== */
-    /* 修复视频显示不全/挤压的核心 CSS */
-    /* ========================================== */
-    
-    /* 1. 确保滑块组件宽度填满，但高度由内容决定 */
+    /* 1. 布局修复：宽度100%，高度自动，移除所有强制高度限制 */
     img-comparison-slider {
       width: 100%;
-      height: auto;
-      outline: none; /* 去掉点击时的蓝框 */
+      height: auto; /* 关键：让视频自己撑开高度 */
+      outline: none;
+      --divider-width: 1px;
+      --divider-color: rgba(255, 255, 255, 0.3); /* 极淡的透明线 */
+      --default-handle-width: 0;
     }
 
-    /* 2. 视频强制自适应：宽度100%，高度自动。绝不强制 height:100% */
+    .video-compare-container {
+      width: 100%; 
+      border-radius: 8px; 
+      overflow: hidden; 
+      /* 移除黑色背景，改用透明或极为淡雅的阴影 */
+      background: transparent; 
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1); 
+      line-height: 0; 
+    }
+
+    /* 2. 视频强制显示规则 */
     .video-compare-container video {
       width: 100% !important;
       height: auto !important;
-      display: block; /* 消除 img/video 标签底部的微小缝隙 */
-      object-fit: cover; /* 保证填满 */
+      display: block;
+      object-fit: contain; /* 确保画面完全显示，不被裁切 */
+      margin: 0;
+      padding: 0;
     }
 
-    /* 3. 容器设置：圆角和阴影 */
-    .video-compare-container {
-      width: 100%; 
-      border-radius: 12px; 
-      overflow: hidden; 
-      box-shadow: 0 4px 15px rgba(0,0,0,0.15); /* 稍微强一点的阴影 */
-      line-height: 0; /* 关键：防止行高导致底部出现白条 */
-    }
-
-    /* 4. 手柄样式设计：高级感磨砂白圆圈 */
+    /* 3. 极简“隐形”手柄 (Glassmorphism) */
     .custom-handle {
-      width: 44px;
-      height: 44px;
-      background: rgba(255, 255, 255, 0.85); /* 磨砂白 */
-      backdrop-filter: blur(4px); /* 毛玻璃效果 */
-      border: 1px solid rgba(255, 255, 255, 0.5);
-      border-radius: 50%; 
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+      width: 40px; 
+      height: 100%;
+      position: absolute;
+      top: 0;
+      left: -20px;
       display: flex;
-      align-items: center;
+      flex-direction: column;
       justify-content: center;
-      color: #333; 
-      cursor: col-resize; 
-      transition: transform 0.1s;
-    }
-    .custom-handle:hover {
-      transform: scale(1.1); /* 鼠标悬停放大一点点 */
-      background: white;
+      align-items: center;
+      pointer-events: none; 
     }
 
-    /* 5. 标签样式：Input / Ours */
+    /* 只有中间一个小圆圈，采用毛玻璃效果，完全透光 */
+    .handle-ring {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      /* 边框也是半透明的 */
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      /* 背景使用模糊滤镜，而不是实心颜色 */
+      background: rgba(255, 255, 255, 0.1); 
+      backdrop-filter: blur(3px); 
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* 极弱的阴影 */
+      z-index: 10;
+    }
+
+    /* 鼠标悬停时稍微清晰一点，提示用户可以拖动 */
+    img-comparison-slider:hover .handle-ring {
+      background: rgba(255, 255, 255, 0.2);
+      border-color: rgba(255, 255, 255, 0.8);
+      transform: scale(1.05);
+      transition: all 0.2s ease;
+    }
+
+    /* 4. 标签样式：移除黑底，改用纯文字+阴影，最大程度减少遮挡 */
     .video-label {
       position: absolute; 
       top: 15px; 
-      color: white; 
-      background: rgba(0,0,0,0.5); 
-      padding: 6px 14px; 
-      border-radius: 6px; 
+      color: rgba(255, 255, 255, 0.95); 
       font-size: 14px;
       font-family: 'Google Sans', sans-serif;
-      font-weight: 500;
-      pointer-events: none; /* 防止遮挡鼠标拖拽 */
-      z-index: 10; /* 确保文字浮在视频最上面 */
-      backdrop-filter: blur(2px);
+      font-weight: 600;
+      letter-spacing: 0.5px; 
+      pointer-events: none; 
+      z-index: 20; 
+      /* 文字阴影代替背景框，保证文字清晰但完全不挡背景 */
+      text-shadow: 0 2px 4px rgba(0,0,0,0.6);
     }
+    
+    .label-left { left: 20px; }
+    .label-right { right: 20px; }
+
   </style>
 </head>
 <body>
@@ -132,22 +144,13 @@
           More Research
         </a>
         <div class="navbar-dropdown">
-          <a class="navbar-item" href="https://hypernerf.github.io">
-            HyperNeRF
-          </a>
-          <a class="navbar-item" href="https://nerfies.github.io">
-            Nerfies
-          </a>
-          <a class="navbar-item" href="https://latentfusion.github.io">
-            LatentFusion
-          </a>
-          <a class="navbar-item" href="https://photoshape.github.io">
-            PhotoShape
-          </a>
+          <a class="navbar-item" href="https://hypernerf.github.io">HyperNeRF</a>
+          <a class="navbar-item" href="https://nerfies.github.io">Nerfies</a>
+          <a class="navbar-item" href="https://latentfusion.github.io">LatentFusion</a>
+          <a class="navbar-item" href="https://photoshape.github.io">PhotoShape</a>
         </div>
       </div>
     </div>
-
   </div>
 </nav>
 
@@ -159,25 +162,13 @@
         <div class="column has-text-centered">
           <h1 class="title is-1 publication-title">Nerfies: Deformable Neural Radiance Fields</h1>
           <div class="is-size-5 publication-authors">
-            <span class="author-block">
-              <a href="https://keunhong.com">Keunhong Park</a><sup>1</sup>,</span>
-            <span class="author-block">
-              <a href="https://utkarshsinha.com">Utkarsh Sinha</a><sup>2</sup>,</span>
-            <span class="author-block">
-              <a href="https://jonbarron.info">Jonathan T. Barron</a><sup>2</sup>,
-            </span>
-            <span class="author-block">
-              <a href="http://sofienbouaziz.com">Sofien Bouaziz</a><sup>2</sup>,
-            </span>
-            <span class="author-block">
-              <a href="https://www.danbgoldman.com">Dan B Goldman</a><sup>2</sup>,
-            </span>
-            <span class="author-block">
-              <a href="https://homes.cs.washington.edu/~seitz/">Steven M. Seitz</a><sup>1,2</sup>,
-            </span>
-            <span class="author-block">
-              <a href="http://www.ricardomartinbrualla.com">Ricardo Martin-Brualla</a><sup>2</sup>
-            </span>
+            <span class="author-block"><a href="https://keunhong.com">Keunhong Park</a><sup>1</sup>,</span>
+            <span class="author-block"><a href="https://utkarshsinha.com">Utkarsh Sinha</a><sup>2</sup>,</span>
+            <span class="author-block"><a href="https://jonbarron.info">Jonathan T. Barron</a><sup>2</sup>,</span>
+            <span class="author-block"><a href="http://sofienbouaziz.com">Sofien Bouaziz</a><sup>2</sup>,</span>
+            <span class="author-block"><a href="https://www.danbgoldman.com">Dan B Goldman</a><sup>2</sup>,</span>
+            <span class="author-block"><a href="https://homes.cs.washington.edu/~seitz/">Steven M. Seitz</a><sup>1,2</sup>,</span>
+            <span class="author-block"><a href="http://www.ricardomartinbrualla.com">Ricardo Martin-Brualla</a><sup>2</sup></span>
           </div>
 
           <div class="is-size-5 publication-authors">
@@ -188,51 +179,30 @@
           <div class="column has-text-centered">
             <div class="publication-links">
               <span class="link-block">
-                <a href="https://arxiv.org/pdf/2011.12948"
-                   class="external-link button is-normal is-rounded is-dark">
-                  <span class="icon">
-                      <i class="fas fa-file-pdf"></i>
-                  </span>
-                  <span>Paper</span>
+                <a href="https://arxiv.org/pdf/2011.12948" class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon"><i class="fas fa-file-pdf"></i></span><span>Paper</span>
                 </a>
               </span>
               <span class="link-block">
-                <a href="https://arxiv.org/abs/2011.12948"
-                   class="external-link button is-normal is-rounded is-dark">
-                  <span class="icon">
-                      <i class="ai ai-arxiv"></i>
-                  </span>
-                  <span>arXiv</span>
+                <a href="https://arxiv.org/abs/2011.12948" class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon"><i class="ai ai-arxiv"></i></span><span>arXiv</span>
                 </a>
               </span>
               <span class="link-block">
-                <a href="https://www.youtube.com/watch?v=MrKrnHhk8IA"
-                   class="external-link button is-normal is-rounded is-dark">
-                  <span class="icon">
-                      <i class="fab fa-youtube"></i>
-                  </span>
-                  <span>Video</span>
+                <a href="https://www.youtube.com/watch?v=MrKrnHhk8IA" class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon"><i class="fab fa-youtube"></i></span><span>Video</span>
                 </a>
               </span>
               <span class="link-block">
-                <a href="https://github.com/google/nerfies"
-                   class="external-link button is-normal is-rounded is-dark">
-                  <span class="icon">
-                      <i class="fab fa-github"></i>
-                  </span>
-                  <span>Code</span>
-                  </a>
+                <a href="https://github.com/google/nerfies" class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon"><i class="fab fa-github"></i></span><span>Code</span>
+                </a>
               </span>
               <span class="link-block">
-                <a href="https://github.com/google/nerfies/releases/tag/0.1"
-                   class="external-link button is-normal is-rounded is-dark">
-                  <span class="icon">
-                      <i class="far fa-images"></i>
-                  </span>
-                  <span>Data</span>
-                  </a>
+                <a href="https://github.com/google/nerfies/releases/tag/0.1" class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon"><i class="far fa-images"></i></span><span>Data</span>
+                </a>
             </div>
-
           </div>
         </div>
       </div>
@@ -244,13 +214,10 @@
   <div class="container is-max-desktop">
     <div class="hero-body">
       <video id="teaser" autoplay muted loop playsinline height="100%">
-        <source src="./static/videos/teaser.mp4"
-                type="video/mp4">
+        <source src="./static/videos/teaser.mp4" type="video/mp4">
       </video>
       <h2 class="subtitle has-text-centered">
-        <span class="dnerf">Nerfies</span> turns selfie videos from your phone into
-        free-viewpoint
-        portraits.
+        <span class="dnerf">Nerfies</span> turns selfie videos from your phone into free-viewpoint portraits.
       </h2>
     </div>
   </div>
@@ -263,50 +230,22 @@
       <div id="results-carousel" class="carousel results-carousel">
         <div class="item item-steve">
           <video poster="" id="steve" autoplay controls muted loop playsinline height="100%">
-            <source src="./static/videos/steve.mp4"
-                    type="video/mp4">
+            <source src="./static/videos/steve.mp4" type="video/mp4">
           </video>
         </div>
         <div class="item item-chair-tp">
           <video poster="" id="chair-tp" autoplay controls muted loop playsinline height="100%">
-            <source src="./static/videos/chair-tp.mp4"
-                    type="video/mp4">
+            <source src="./static/videos/chair-tp.mp4" type="video/mp4">
           </video>
         </div>
         <div class="item item-shiba">
           <video poster="" id="shiba" autoplay controls muted loop playsinline height="100%">
-            <source src="./static/videos/shiba.mp4"
-                    type="video/mp4">
+            <source src="./static/videos/shiba.mp4" type="video/mp4">
           </video>
         </div>
         <div class="item item-fullbody">
           <video poster="" id="fullbody" autoplay controls muted loop playsinline height="100%">
-            <source src="./static/videos/fullbody.mp4"
-                    type="video/mp4">
-          </video>
-        </div>
-        <div class="item item-blueshirt">
-          <video poster="" id="blueshirt" autoplay controls muted loop playsinline height="100%">
-            <source src="./static/videos/blueshirt.mp4"
-                    type="video/mp4">
-          </video>
-        </div>
-        <div class="item item-mask">
-          <video poster="" id="mask" autoplay controls muted loop playsinline height="100%">
-            <source src="./static/videos/mask.mp4"
-                    type="video/mp4">
-          </video>
-        </div>
-        <div class="item item-coffee">
-          <video poster="" id="coffee" autoplay controls muted loop playsinline height="100%">
-            <source src="./static/videos/coffee.mp4"
-                    type="video/mp4">
-          </video>
-        </div>
-        <div class="item item-toby">
-          <video poster="" id="toby" autoplay controls muted loop playsinline height="100%">
-            <source src="./static/videos/toby2.mp4"
-                    type="video/mp4">
+            <source src="./static/videos/fullbody.mp4" type="video/mp4">
           </video>
         </div>
       </div>
@@ -321,7 +260,7 @@
       <div class="column is-full-width">
         <h2 class="title is-3">Visual Comparison</h2>
         <div class="content has-text-centered">
-          <p>拖动中间的滑块来对比白膜(Left)和上色结果(Right)。</p>
+          <p>Drag the slider to compare.</p>
         </div>
 
         <div class="video-compare-container">
@@ -332,21 +271,18 @@
               <video id="video-left" autoplay loop muted playsinline>
                 <source src="./static/videos/render_rgb.mp4" type="video/mp4">
               </video>
-              <span class="video-label" style="left: 15px;">Input</span>
+              <span class="video-label label-left">Input</span>
             </figure>
         
             <figure slot="second" class="after" style="margin:0; width:100%;">
               <video id="video-right" autoplay loop muted playsinline>
-                <source src="./static/videos/render_output.mp4" type="video/mp4">
+                <source src="./static/videos/render_rgb2.mp4" type="video/mp4">
               </video>
-              <span class="video-label" style="right: 15px;">Ours</span>
+              <span class="video-label label-right">Ours</span>
             </figure>
 
             <div slot="handle" class="custom-handle">
-              <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
-                <path d="M7.41,15.41L12,10.83L16.59,15.41L18,14L12,8L6,14L7.41,15.41Z" transform="rotate(-90 12 12) translate(0 1)"/>
-                <path d="M7.41,15.41L12,10.83L16.59,15.41L18,14L12,8L6,14L7.41,15.41Z" transform="rotate(90 12 12) translate(0 -1)"/>
-              </svg>
+              <div class="handle-ring"></div>
             </div>
 
           </img-comparison-slider>
@@ -361,10 +297,8 @@
   const vLeft = document.getElementById('video-left');
   const vRight = document.getElementById('video-right');
   if(vLeft && vRight){
-      // 确保两个视频状态同步
       vLeft.addEventListener('play', () => vRight.play());
       vLeft.addEventListener('pause', () => vRight.pause());
-      // 进度同步校准
       vLeft.addEventListener('timeupdate', () => {
         if (Math.abs(vLeft.currentTime - vRight.currentTime) > 0.1) {
           vRight.currentTime = vLeft.currentTime;
@@ -376,119 +310,15 @@
 
 <section class="section">
   <div class="container is-max-desktop">
-
-    <div class="columns is-centered">
-
-      <div class="column">
-        <div class="content">
-          <h2 class="title is-3">Visual Effects</h2>
-          <p>
-            Using <i>nerfies</i> you can create fun visual effects. This Dolly zoom effect
-            would be impossible without nerfies since it would require going through a wall.
-          </p>
-          <video id="dollyzoom" autoplay controls muted loop playsinline height="100%">
-            <source src="./static/videos/dollyzoom-stacked.mp4"
-                    type="video/mp4">
-          </video>
-        </div>
-      </div>
-      <div class="column">
-        <h2 class="title is-3">Matting</h2>
-        <div class="columns is-centered">
-          <div class="column content">
-            <p>
-              As a byproduct of our method, we can also solve the matting problem by ignoring
-              samples that fall outside of a bounding box during rendering.
-            </p>
-            <video id="matting-video" controls playsinline height="100%">
-              <source src="./static/videos/matting.mp4"
-                      type="video/mp4">
-            </video>
-          </div>
-
-        </div>
-      </div>
-    </div>
-    <div class="columns is-centered">
-      <div class="column is-full-width">
-        <h2 class="title is-3">Animation</h2>
-
-        <h3 class="title is-4">Interpolating states</h3>
-        <div class="content has-text-justified">
-          <p>
-            We can also animate the scene by interpolating the deformation latent codes of two input
-            frames. Use the slider here to linearly interpolate between the left frame and the right
-            frame.
-          </p>
-        </div>
-        <div class="columns is-vcentered interpolation-panel">
-          <div class="column is-3 has-text-centered">
-            <img src="./static/images/interpolate_start.jpg"
-                 class="interpolation-image"
-                 alt="Interpolate start reference image."/>
-            <p>Start Frame</p>
-          </div>
-          <div class="column interpolation-video-column">
-            <div id="interpolation-image-wrapper">
-              Loading...
-            </div>
-            <input class="slider is-fullwidth is-large is-info"
-                   id="interpolation-slider"
-                   step="1" min="0" max="100" value="0" type="range">
-          </div>
-          <div class="column is-3 has-text-centered">
-            <img src="./static/images/interpolate_end.jpg"
-                 class="interpolation-image"
-                 alt="Interpolation end reference image."/>
-            <p class="is-bold">End Frame</p>
-          </div>
-        </div>
-        <br/>
-        <h3 class="title is-4">Re-rendering the input video</h3>
-        <div class="content has-text-justified">
-          <p>
-            Using <span class="dnerf">Nerfies</span>, you can re-render a video from a novel
-            viewpoint such as a stabilized camera by playing back the training deformations.
-          </p>
-        </div>
-        <div class="content has-text-centered">
-          <video id="replay-video"
-                 controls
-                 muted
-                 preload
-                 playsinline
-                 width="75%">
-            <source src="./static/videos/replay.mp4"
-                    type="video/mp4">
-          </video>
-        </div>
-        </div>
-    </div>
     <div class="columns is-centered">
       <div class="column is-full-width">
         <h2 class="title is-3">Related Links</h2>
-
         <div class="content has-text-justified">
-          <p>
-            There's a lot of excellent work that was introduced around the same time as ours.
-          </p>
-          <p>
-            <a href="https://arxiv.org/abs/2104.09125">Progressive Encoding for Neural Optimization</a> introduces an idea similar to our windowed position encoding for coarse-to-fine optimization.
-          </p>
-          <p>
-            <a href="https://www.albertpumarola.com/research/D-NeRF/index.html">D-NeRF</a> and <a href="https://gvv.mpi-inf.mpg.de/projects/nonrigid_nerf/">NR-NeRF</a>
-            both use deformation fields to model non-rigid scenes.
-          </p>
-          <p>
-            Some works model videos with a NeRF by directly modulating the density, such as <a href="https://video-nerf.github.io/">Video-NeRF</a>, <a href="https://www.cs.cornell.edu/~zl548/NSFF/">NSFF</a>, and <a href="https://neural-3d-video.github.io/">DyNeRF</a>
-          </p>
-          <p>
-            There are probably many more by the time you are reading this. Check out <a href="https://dellaert.github.io/NeRF/">Frank Dellart's survey on recent NeRF papers</a>, and <a href="https://github.com/yenchenlin/awesome-NeRF">Yen-Chen Lin's curated list of NeRF papers</a>.
-          </p>
+          <p>There's a lot of excellent work that was introduced around the same time as ours.</p>
         </div>
       </div>
     </div>
-    </div>
+  </div>
 </section>
 
 
@@ -508,8 +338,7 @@
 <footer class="footer">
   <div class="container">
     <div class="content has-text-centered">
-      <a class="icon-link"
-         href="./static/videos/nerfies_paper.pdf">
+      <a class="icon-link" href="./static/videos/nerfies_paper.pdf">
         <i class="fas fa-file-pdf"></i>
       </a>
       <a class="icon-link" href="https://github.com/keunhong" class="external-link" disabled>
@@ -520,16 +349,7 @@
       <div class="column is-8">
         <div class="content">
           <p>
-            This website is licensed under a <a rel="license"
-                                                href="http://creativecommons.org/licenses/by-sa/4.0/">Creative
-            Commons Attribution-ShareAlike 4.0 International License</a>.
-          </p>
-          <p>
-            This means you are free to borrow the <a
-              href="https://github.com/nerfies/nerfies.github.io">source code</a> of this website,
-            we just ask that you link back to this page in the footer.
-            Please remember to remove the analytics code included in the header of the website which
-            you do not want on your website.
+            This website is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/">Creative Commons Attribution-ShareAlike 4.0 International License</a>.
           </p>
         </div>
       </div>
