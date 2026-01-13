@@ -43,28 +43,70 @@
   <script src="./static/js/index.js"></script>
 
   <style>
-    /* 1. 保证视频不被截断，自适应高度 */
-    .comparison-container video {
+    /* ========================================== */
+    /* 修复视频显示不全/挤压的核心 CSS */
+    /* ========================================== */
+    
+    /* 1. 确保滑块组件宽度填满，但高度由内容决定 */
+    img-comparison-slider {
       width: 100%;
       height: auto;
-      display: block;
+      outline: none; /* 去掉点击时的蓝框 */
     }
 
-    /* 2. 手柄样式设计：磨砂白圆圈 + 阴影，专业且不花哨 */
+    /* 2. 视频强制自适应：宽度100%，高度自动。绝不强制 height:100% */
+    .video-compare-container video {
+      width: 100% !important;
+      height: auto !important;
+      display: block; /* 消除 img/video 标签底部的微小缝隙 */
+      object-fit: cover; /* 保证填满 */
+    }
+
+    /* 3. 容器设置：圆角和阴影 */
+    .video-compare-container {
+      width: 100%; 
+      border-radius: 12px; 
+      overflow: hidden; 
+      box-shadow: 0 4px 15px rgba(0,0,0,0.15); /* 稍微强一点的阴影 */
+      line-height: 0; /* 关键：防止行高导致底部出现白条 */
+    }
+
+    /* 4. 手柄样式设计：高级感磨砂白圆圈 */
     .custom-handle {
-      width: 40px;
-      height: 40px;
-      background: rgba(255, 255, 255, 0.9); /* 半透明白色背景 */
-      border-radius: 50%; /* 圆形 */
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4); /* 柔和阴影，增加立体感 */
+      width: 44px;
+      height: 44px;
+      background: rgba(255, 255, 255, 0.85); /* 磨砂白 */
+      backdrop-filter: blur(4px); /* 毛玻璃效果 */
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      border-radius: 50%; 
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
       display: flex;
       align-items: center;
       justify-content: center;
-      color: #4a4a4a; /* 箭头颜色：深灰，比纯黑更高级 */
-      cursor: col-resize; /* 鼠标放上去显示左右拖动图标 */
+      color: #333; 
+      cursor: col-resize; 
+      transition: transform 0.1s;
+    }
+    .custom-handle:hover {
+      transform: scale(1.1); /* 鼠标悬停放大一点点 */
+      background: white;
     }
 
-    /* 如果你需要箭头图标是纯CSS画的，可以用下面的svg替代，这里为了代码简洁直接用svg slot */
+    /* 5. 标签样式：Input / Ours */
+    .video-label {
+      position: absolute; 
+      top: 15px; 
+      color: white; 
+      background: rgba(0,0,0,0.5); 
+      padding: 6px 14px; 
+      border-radius: 6px; 
+      font-size: 14px;
+      font-family: 'Google Sans', sans-serif;
+      font-weight: 500;
+      pointer-events: none; /* 防止遮挡鼠标拖拽 */
+      z-index: 10; /* 确保文字浮在视频最上面 */
+      backdrop-filter: blur(2px);
+    }
   </style>
 </head>
 <body>
@@ -282,22 +324,22 @@
           <p>拖动中间的滑块来对比白膜(Left)和上色结果(Right)。</p>
         </div>
 
-        <div class="comparison-container" style="width: 100%; border-radius: 10px; overflow: hidden; box-shadow: 0 0 15px rgba(0,0,0,0.1);">
+        <div class="video-compare-container">
           
           <img-comparison-slider>
             
             <figure slot="first" class="before" style="margin:0; width:100%;">
-              <video id="video-left" autoplay loop muted playsinline style="width: 100%; height: auto;">
+              <video id="video-left" autoplay loop muted playsinline>
                 <source src="./static/videos/render_rgb.mp4" type="video/mp4">
               </video>
-              <figcaption style="position: absolute; top: 10px; left: 10px; color: white; background: rgba(0,0,0,0.6); padding: 4px 10px; border-radius: 4px; font-size: 14px;">Input</figcaption>
+              <span class="video-label" style="left: 15px;">Input</span>
             </figure>
         
             <figure slot="second" class="after" style="margin:0; width:100%;">
-              <video id="video-right" autoplay loop muted playsinline style="width: 100%; height: auto;">
-                <source src="./static/videos/render_rgb2.mp4" type="video/mp4">
+              <video id="video-right" autoplay loop muted playsinline>
+                <source src="./static/videos/render_output.mp4" type="video/mp4">
               </video>
-              <figcaption style="position: absolute; top: 10px; right: 10px; color: white; background: rgba(0,0,0,0.6); padding: 4px 10px; border-radius: 4px; font-size: 14px;">Ours</figcaption>
+              <span class="video-label" style="right: 15px;">Ours</span>
             </figure>
 
             <div slot="handle" class="custom-handle">
