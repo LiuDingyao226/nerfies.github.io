@@ -3,10 +3,10 @@
 <head>
   <meta charset="utf-8">
   <meta name="description"
-        content="Deformable Neural Radiance Fields creates free-viewpoint portraits (nerfies) from casually captured videos.">
-  <meta name="keywords" content="Nerfies, D-NeRF, NeRF">
+        content="GeoDiff3D: Self-Supervised 3D Scene Generation with Geometry-Constrained 2D Diffusion Guidance">
+  <meta name="keywords" content="GeoDiff3D, Diffusion, 3D Generation">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Nerfies: Deformable Neural Radiance Fields</title>
+  <title>GeoDiff3D: Self-Supervised 3D Scene Generation</title>
 
   <script defer src="https://cdn.jsdelivr.net/npm/img-comparison-slider@8/dist/index.js"></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/img-comparison-slider@8/dist/styles.css" />
@@ -51,13 +51,10 @@
       min-height: 300px;
       background-color: #f5f5f5; 
       border-radius: 8px;
-      /* 这里不能 hidden，否则标签如果溢出会被切掉，
-         但为了圆角通常需要 hidden。
-         由于我们将标签绝对定位在内部，没问题。 */
       overflow: hidden; 
       box-shadow: 0 10px 40px -10px rgba(0,0,0,0.3);
       line-height: 0;
-      position: relative; /* 关键：作为标签定位的父级 */
+      position: relative; 
     }
 
     .video-compare-container video {
@@ -119,7 +116,7 @@
       background: rgba(255, 255, 255, 0.4);
     }
 
-    /* 标签样式 - 修复版：现在是直接定位在容器上，不随 Slider 裁切 */
+    /* 标签样式 */
     .video-label {
       position: absolute;
       top: 20px;
@@ -128,11 +125,11 @@
       font-weight: 700;
       letter-spacing: 1px;
       text-transform: uppercase;
-      background: rgba(0, 0, 0, 0.5); /* 稍微加深背景 */
+      background: rgba(0, 0, 0, 0.5); 
       padding: 6px 12px;
       border-radius: 4px;
       pointer-events: none;
-      z-index: 99; /* 保证在最顶层 */
+      z-index: 99; 
       backdrop-filter: blur(3px);
       border: 1px solid rgba(255,255,255,0.1);
     }
@@ -141,14 +138,12 @@
     .label-right { right: 20px; }
 
     /* ==========================================
-       2. 对比矩阵样式 (Matrix) - 增加放大镜效果
+       2. 对比矩阵样式 (Matrix)
        ========================================== */
     
     .matrix-container {
       width: 100%;
-      /* 允许横向滚动 */
       overflow-x: auto; 
-      /* 增加上下 padding，防止放大的视频被容器边缘裁掉 */
       padding: 40px 10px; 
     }
 
@@ -184,19 +179,16 @@
       font-size: 1.0rem;
     }
 
-    /* 视频单元格 - 基础样式 */
     .grid-cell {
       position: relative;
       border-radius: 6px;
-      overflow: hidden; /* 保证视频圆角 */
+      overflow: hidden;
       line-height: 0;
       box-shadow: 0 2px 8px rgba(0,0,0,0.1);
       background: #000;
       aspect-ratio: 16 / 9;
-      
-      /* 关键：增加平滑过渡效果 */
       transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-      z-index: 1; /* 默认层级 */
+      z-index: 1;
       transform-origin: center center;
     }
 
@@ -206,15 +198,10 @@
       object-fit: cover;
     }
 
-    /* 鼠标悬停 - 放大效果 (Pop-out) */
     .grid-cell:hover {
-      /* 放大 1.8 倍 */
       transform: scale(1.8);
-      /* 提高层级，覆盖周围元素 */
       z-index: 100; 
-      /* 增加明显的阴影，制造悬浮感 */
       box-shadow: 0 15px 35px rgba(0,0,0,0.5);
-      /* 加一个白边框突出显示 */
       border: 2px solid #fff;
       cursor: pointer;
     }
@@ -223,7 +210,6 @@
       border: 2px solid rgba(32, 156, 238, 0.3);
     }
     
-    /* 当悬停在 Ours 单元格时，边框变回白色，保持一致性 */
     .grid-cell.ours-cell:hover {
       border: 2px solid #fff;
     }
@@ -269,20 +255,19 @@
     <div class="container is-max-desktop">
       <div class="columns is-centered">
         <div class="column has-text-centered">
-          <h1 class="title is-1 publication-title">Nerfies: Deformable Neural Radiance Fields</h1>
+          <h1 class="title is-1 publication-title">GeoDiff3D: Self-Supervised 3D Scene Generation with Geometry-Constrained 2D Diffusion Guidance</h1>
+          
           <div class="is-size-5 publication-authors">
-            <span class="author-block"><a href="https://keunhong.com">Keunhong Park</a><sup>1</sup>,</span>
-            <span class="author-block"><a href="https://utkarshsinha.com">Utkarsh Sinha</a><sup>2</sup>,</span>
-            <span class="author-block"><a href="https://jonbarron.info">Jonathan T. Barron</a><sup>2</sup>,</span>
-            <span class="author-block"><a href="http://sofienbouaziz.com">Sofien Bouaziz</a><sup>2</sup>,</span>
-            <span class="author-block"><a href="https://www.danbgoldman.com">Dan B Goldman</a><sup>2</sup>,</span>
-            <span class="author-block"><a href="https://homes.cs.washington.edu/~seitz/">Steven M. Seitz</a><sup>1,2</sup>,</span>
-            <span class="author-block"><a href="http://www.ricardomartinbrualla.com">Ricardo Martin-Brualla</a><sup>2</sup></span>
+            <span class="author-block">Haozhi Zhu,</span>
+            <span class="author-block">Miaomiao Zhao,</span>
+            <span class="author-block">Dingyao Liu,</span>
+            <span class="author-block">Yan Zhang,</span>
+            <span class="author-block">Jie Guo,</span>
+            <span class="author-block">Fenggen Yu</span>
           </div>
 
           <div class="is-size-5 publication-authors">
-            <span class="author-block"><sup>1</sup>University of Washington,</span>
-            <span class="author-block"><sup>2</sup>Google Research</span>
+            <span class="author-block">Nanjing University</span>
           </div>
 
           <div class="column has-text-centered">
@@ -311,6 +296,7 @@
                 <a href="https://github.com/google/nerfies/releases/tag/0.1" class="external-link button is-normal is-rounded is-dark">
                   <span class="icon"><i class="far fa-images"></i></span><span>Data</span>
                 </a>
+              </span>
             </div>
           </div>
         </div>
@@ -319,15 +305,116 @@
   </div>
 </section>
 
-<section class="hero teaser">
+
+<section class="section">
   <div class="container is-max-desktop">
-    <div class="hero-body">
-      <video id="teaser" autoplay muted loop playsinline height="100%">
-        <source src="./static/videos/teaser.mp4" type="video/mp4">
-      </video>
-      <h2 class="subtitle has-text-centered">
-        <span class="dnerf">Nerfies</span> turns selfie videos from your phone into free-viewpoint portraits.
-      </h2>
+    <div class="columns is-centered">
+      <div class="column is-full-width">
+        <h2 class="title is-3">Visual Comparison</h2>
+        <div class="content has-text-centered">
+          <p>Drag the slider to compare. Click arrows to switch scenes.</p>
+        </div>
+
+        <h3 class="title is-5 has-text-centered" id="comparison-scene-title">Scene 1</h3>
+
+        <div class="columns is-vcentered is-mobile">
+          <div class="column is-1 has-text-centered">
+            <button class="button is-ghost is-large" type="button" onclick="nextScene(-1)">
+              <span class="icon is-medium"><i class="fas fa-chevron-left fa-lg"></i></span>
+            </button>
+          </div>
+
+          <div class="column is-10">
+            <div class="video-compare-container" id="comparison-container">
+              <span class="video-label label-left">Input</span>
+              <span class="video-label label-right">Ours</span>
+
+              <img-comparison-slider>
+                <figure slot="first" class="before" style="margin:0; width:100%;">
+                  <video id="video-left" autoplay loop muted playsinline src="./static/videos/render_rgb.mp4"></video>
+                </figure>
+                <figure slot="second" class="after" style="margin:0; width:100%;">
+                  <video id="video-right" autoplay loop muted playsinline src="./static/videos/render_rgb2.mp4"></video>
+                </figure>
+                <div slot="handle" class="custom-handle">
+                   <div class="handle-line"></div>
+                   <div class="handle-circle"><i class="fas fa-arrows-alt-h"></i></div>
+                </div>
+              </img-comparison-slider>
+            </div>
+          </div>
+
+          <div class="column is-1 has-text-centered">
+            <button class="button is-ghost is-large" type="button" onclick="nextScene(1)">
+              <span class="icon is-medium"><i class="fas fa-chevron-right fa-lg"></i></span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<section class="section">
+  <div class="container is-max-desktop">
+    
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-full-width">
+        <h2 class="title is-3">Comparisons</h2>
+        <div class="content has-text-centered">
+          <p>Full results on 4 different scenes across 6 methods. Hover to zoom.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="matrix-container">
+      <div class="grid-container">
+        
+        <div></div>
+        <div class="grid-header">Scene 1</div>
+        <div class="grid-header">Scene 2</div>
+        <div class="grid-header">Scene 3</div>
+        <div class="grid-header">Scene 4</div>
+
+        <div class="grid-label">Method A</div>
+        <div class="grid-cell"><video class="sync-col-1" autoplay loop muted playsinline src="./static/videos/render_rgb.mp4"></video></div>
+        <div class="grid-cell"><video class="sync-col-2" autoplay loop muted playsinline src="./static/videos/render_rgb.mp4"></video></div>
+        <div class="grid-cell"><video class="sync-col-3" autoplay loop muted playsinline src="./static/videos/render_rgb.mp4"></video></div>
+        <div class="grid-cell"><video class="sync-col-4" autoplay loop muted playsinline src="./static/videos/render_rgb.mp4"></video></div>
+
+        <div class="grid-label">Method B</div>
+        <div class="grid-cell"><video class="sync-col-1" autoplay loop muted playsinline src="./static/videos/render_rgb.mp4"></video></div>
+        <div class="grid-cell"><video class="sync-col-2" autoplay loop muted playsinline src="./static/videos/render_rgb.mp4"></video></div>
+        <div class="grid-cell"><video class="sync-col-3" autoplay loop muted playsinline src="./static/videos/render_rgb.mp4"></video></div>
+        <div class="grid-cell"><video class="sync-col-4" autoplay loop muted playsinline src="./static/videos/render_rgb.mp4"></video></div>
+
+        <div class="grid-label">Method C</div>
+        <div class="grid-cell"><video class="sync-col-1" autoplay loop muted playsinline src="./static/videos/render_rgb.mp4"></video></div>
+        <div class="grid-cell"><video class="sync-col-2" autoplay loop muted playsinline src="./static/videos/render_rgb.mp4"></video></div>
+        <div class="grid-cell"><video class="sync-col-3" autoplay loop muted playsinline src="./static/videos/render_rgb.mp4"></video></div>
+        <div class="grid-cell"><video class="sync-col-4" autoplay loop muted playsinline src="./static/videos/render_rgb.mp4"></video></div>
+
+        <div class="grid-label">Method D</div>
+        <div class="grid-cell"><video class="sync-col-1" autoplay loop muted playsinline src="./static/videos/render_rgb.mp4"></video></div>
+        <div class="grid-cell"><video class="sync-col-2" autoplay loop muted playsinline src="./static/videos/render_rgb.mp4"></video></div>
+        <div class="grid-cell"><video class="sync-col-3" autoplay loop muted playsinline src="./static/videos/render_rgb.mp4"></video></div>
+        <div class="grid-cell"><video class="sync-col-4" autoplay loop muted playsinline src="./static/videos/render_rgb.mp4"></video></div>
+
+        <div class="grid-label">Method E</div>
+        <div class="grid-cell"><video class="sync-col-1" autoplay loop muted playsinline src="./static/videos/render_rgb.mp4"></video></div>
+        <div class="grid-cell"><video class="sync-col-2" autoplay loop muted playsinline src="./static/videos/render_rgb.mp4"></video></div>
+        <div class="grid-cell"><video class="sync-col-3" autoplay loop muted playsinline src="./static/videos/render_rgb.mp4"></video></div>
+        <div class="grid-cell"><video class="sync-col-4" autoplay loop muted playsinline src="./static/videos/render_rgb.mp4"></video></div>
+
+        <div class="grid-label ours">Ours</div>
+        <div class="grid-cell ours-cell"><video class="sync-col-1" autoplay loop muted playsinline src="./static/videos/render_rgb2.mp4"></video></div>
+        <div class="grid-cell ours-cell"><video class="sync-col-2" autoplay loop muted playsinline src="./static/videos/render_rgb2.mp4"></video></div>
+        <div class="grid-cell ours-cell"><video class="sync-col-3" autoplay loop muted playsinline src="./static/videos/render_rgb2.mp4"></video></div>
+        <div class="grid-cell ours-cell"><video class="sync-col-4" autoplay loop muted playsinline src="./static/videos/render_rgb2.mp4"></video></div>
+
+      </div>
     </div>
   </div>
 </section>
@@ -363,123 +450,24 @@
 </section>
 
 
-<section class="section">
+<section class="hero teaser">
   <div class="container is-max-desktop">
-    <div class="columns is-centered">
-      <div class="column is-full-width">
-        <h2 class="title is-3">Visual Comparison</h2>
-        <div class="content has-text-centered">
-          <p>Drag the slider to compare. Click arrows to switch scenes.</p>
-        </div>
-
-        <h3 class="title is-5 has-text-centered" id="comparison-scene-title">Scene 1</h3>
-
-        <div class="columns is-vcentered is-mobile">
-          <div class="column is-1 has-text-centered">
-            <button class="button is-ghost is-large" type="button" onclick="nextScene(-1)">
-              <span class="icon is-medium"><i class="fas fa-chevron-left fa-lg"></i></span>
-            </button>
-          </div>
-
-          <div class="column is-10">
-            <div class="video-compare-container" id="comparison-container">
-              
-              <span class="video-label label-left">Input</span>
-              <span class="video-label label-right">Ours</span>
-
-              <img-comparison-slider>
-                <figure slot="first" class="before" style="margin:0; width:100%;">
-                  <video id="video-left" autoplay loop muted playsinline src="./static/videos/render_rgb.mp4"></video>
-                </figure>
-                <figure slot="second" class="after" style="margin:0; width:100%;">
-                  <video id="video-right" autoplay loop muted playsinline src="./static/videos/render_rgb2.mp4"></video>
-                </figure>
-                <div slot="handle" class="custom-handle">
-                   <div class="handle-line"></div>
-                   <div class="handle-circle"><i class="fas fa-arrows-alt-h"></i></div>
-                </div>
-              </img-comparison-slider>
-
-            </div>
-          </div>
-
-          <div class="column is-1 has-text-centered">
-            <button class="button is-ghost is-large" type="button" onclick="nextScene(1)">
-              <span class="icon is-medium"><i class="fas fa-chevron-right fa-lg"></i></span>
-            </button>
-          </div>
-        </div>
-
-      </div>
-    </div>
-  </div>
-</section>
-
-
-<section class="section">
-  <div class="container is-max-desktop">
-    
-    <div class="columns is-centered has-text-centered">
-      <div class="column is-full-width">
-        <h2 class="title is-3">Comparisons</h2>
-        <div class="content has-text-centered">
-          <p>Hover over the videos to see details.</p>
-        </div>
-      </div>
-    </div>
-
-    <div class="matrix-container">
-      <div class="grid-container">
-        
-        <div></div> <div class="grid-header">Scene 1</div>
-        <div class="grid-header">Scene 2</div>
-        <div class="grid-header">Scene 3</div>
-        <div class="grid-header">Scene 4</div>
-
-        <div class="grid-label">Method A</div>
-        <div class="grid-cell"><video autoplay loop muted playsinline src="./static/videos/render_rgb.mp4"></video></div>
-        <div class="grid-cell"><video autoplay loop muted playsinline src="./static/videos/render_rgb.mp4"></video></div>
-        <div class="grid-cell"><video autoplay loop muted playsinline src="./static/videos/render_rgb.mp4"></video></div>
-        <div class="grid-cell"><video autoplay loop muted playsinline src="./static/videos/render_rgb.mp4"></video></div>
-
-        <div class="grid-label">Method B</div>
-        <div class="grid-cell"><video autoplay loop muted playsinline src="./static/videos/render_rgb.mp4"></video></div>
-        <div class="grid-cell"><video autoplay loop muted playsinline src="./static/videos/render_rgb.mp4"></video></div>
-        <div class="grid-cell"><video autoplay loop muted playsinline src="./static/videos/render_rgb.mp4"></video></div>
-        <div class="grid-cell"><video autoplay loop muted playsinline src="./static/videos/render_rgb.mp4"></video></div>
-
-        <div class="grid-label">Method C</div>
-        <div class="grid-cell"><video autoplay loop muted playsinline src="./static/videos/render_rgb.mp4"></video></div>
-        <div class="grid-cell"><video autoplay loop muted playsinline src="./static/videos/render_rgb.mp4"></video></div>
-        <div class="grid-cell"><video autoplay loop muted playsinline src="./static/videos/render_rgb.mp4"></video></div>
-        <div class="grid-cell"><video autoplay loop muted playsinline src="./static/videos/render_rgb.mp4"></video></div>
-
-        <div class="grid-label">Method D</div>
-        <div class="grid-cell"><video autoplay loop muted playsinline src="./static/videos/render_rgb.mp4"></video></div>
-        <div class="grid-cell"><video autoplay loop muted playsinline src="./static/videos/render_rgb.mp4"></video></div>
-        <div class="grid-cell"><video autoplay loop muted playsinline src="./static/videos/render_rgb.mp4"></video></div>
-        <div class="grid-cell"><video autoplay loop muted playsinline src="./static/videos/render_rgb.mp4"></video></div>
-
-        <div class="grid-label">Method E</div>
-        <div class="grid-cell"><video autoplay loop muted playsinline src="./static/videos/render_rgb.mp4"></video></div>
-        <div class="grid-cell"><video autoplay loop muted playsinline src="./static/videos/render_rgb.mp4"></video></div>
-        <div class="grid-cell"><video autoplay loop muted playsinline src="./static/videos/render_rgb.mp4"></video></div>
-        <div class="grid-cell"><video autoplay loop muted playsinline src="./static/videos/render_rgb.mp4"></video></div>
-
-        <div class="grid-label ours">Ours</div>
-        <div class="grid-cell ours-cell"><video autoplay loop muted playsinline src="./static/videos/render_rgb2.mp4"></video></div>
-        <div class="grid-cell ours-cell"><video autoplay loop muted playsinline src="./static/videos/render_rgb2.mp4"></video></div>
-        <div class="grid-cell ours-cell"><video autoplay loop muted playsinline src="./static/videos/render_rgb2.mp4"></video></div>
-        <div class="grid-cell ours-cell"><video autoplay loop muted playsinline src="./static/videos/render_rgb2.mp4"></video></div>
-
-      </div>
+    <div class="hero-body">
+      <video id="teaser" autoplay muted loop playsinline height="100%">
+        <source src="./static/videos/teaser.mp4" type="video/mp4">
+      </video>
+      <h2 class="subtitle has-text-centered">
+        <span class="dnerf">GeoDiff3D</span> turns selfie videos from your phone into free-viewpoint portraits.
+      </h2>
     </div>
   </div>
 </section>
 
 
 <script>
-  // 场景数据
+  // ==========================================
+  // 1. 左右滑动切换部分逻辑
+  // ==========================================
   const scenes = [
     {
       name: "Scene 1",
@@ -532,7 +520,6 @@
     const title = document.getElementById('comparison-scene-title');
     const container = document.getElementById('comparison-container');
     
-    // 锁定高度防止跳动
     container.style.height = container.offsetHeight + 'px';
 
     title.innerText = scenes[currentSceneIndex].name;
@@ -548,6 +535,57 @@
       container.style.height = 'auto';
     }, 500);
   }
+
+  // ==========================================
+  // 2. 视频同步逻辑 (Matrix Sync)
+  // ==========================================
+  
+  function syncVideos(columnIndex) {
+    const videos = document.querySelectorAll(`.sync-col-${columnIndex}`);
+    if (videos.length === 0) return;
+
+    const master = videos[0]; // 将第一行的视频作为主控
+
+    // 当主视频循环播放时，强制其他视频重置
+    master.addEventListener('ended', () => {
+      videos.forEach(v => {
+        v.currentTime = 0;
+        v.play();
+      });
+    });
+    
+    // 当主视频开始播放时，其他视频也播放
+    master.addEventListener('play', () => {
+      videos.forEach(v => {
+        if (v !== master && v.paused) v.play();
+      });
+    });
+
+    // 可选：定期校准（每秒检查一次，防止误差积累）
+    // 注意：如果视频本身长度不一致，这个逻辑会导致短视频被强制拉长或跳帧
+    // 假设所有对比方法的视频帧数和时长是严格一致的
+    /*
+    setInterval(() => {
+      if (!master.paused) {
+        videos.forEach(v => {
+          // 如果误差超过 0.1秒，强制同步
+          if (Math.abs(v.currentTime - master.currentTime) > 0.1) {
+            v.currentTime = master.currentTime;
+          }
+        });
+      }
+    }, 1000);
+    */
+  }
+
+  // 初始化所有列的同步
+  document.addEventListener('DOMContentLoaded', () => {
+    // 假设有4列场景
+    for (let i = 1; i <= 4; i++) {
+      syncVideos(i);
+    }
+  });
+
 </script>
 
 </body>
