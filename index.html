@@ -214,13 +214,13 @@
       border: 2px solid #fff;
     }
 
-    /* Carousel Stage Label */
-    .stage-label {
+    /* 通用标签样式 */
+    .section-subtitle-label {
         font-family: 'Google Sans', sans-serif;
-        font-size: 1.1rem;
+        font-size: 1.2rem;
         font-weight: 700;
         color: #4a4a4a;
-        margin-bottom: 8px;
+        margin-top: 10px;
     }
 
   </style>
@@ -434,31 +434,31 @@
     <div class="container">
       <div id="results-carousel" class="carousel results-carousel">
         
-        <div class="item item-stage1 has-text-centered">
-          <p class="stage-label">Stage 1</p>
-          <video poster="" id="stage1" autoplay controls muted loop playsinline height="100%">
+        <div class="item item-case1 has-text-centered">
+          <p class="section-subtitle-label">Case 1</p>
+          <video poster="" id="case1" autoplay controls muted loop playsinline height="100%">
             <source src="./static/videos/steve.mp4" type="video/mp4">
           </video>
         </div>
         
-        <div class="item item-stage2 has-text-centered">
-           <p class="stage-label">Stage 2</p>
-          <video poster="" id="stage2" autoplay controls muted loop playsinline height="100%">
+        <div class="item item-case2 has-text-centered">
+           <p class="section-subtitle-label">Case 2</p>
+          <video poster="" id="case2" autoplay controls muted loop playsinline height="100%">
             <source src="./static/videos/chair-tp.mp4" type="video/mp4">
           </video>
         </div>
         
-        <div class="item item-stage3 has-text-centered">
-           <p class="stage-label">Stage 3</p>
-          <video poster="" id="stage3" autoplay controls muted loop playsinline height="100%">
+        <div class="item item-case3 has-text-centered">
+           <p class="section-subtitle-label">Case 3</p>
+          <video poster="" id="case3" autoplay controls muted loop playsinline height="100%">
             <source src="./static/videos/shiba.mp4" type="video/mp4">
           </video>
         </div>
         
-        <div class="item item-stage4 has-text-centered">
-           <p class="stage-label">Stage 4</p>
-          <video poster="" id="stage4" autoplay controls muted loop playsinline height="100%">
-            <source src="./static/videos/shiba.mp4" type="video/mp4">
+        <div class="item item-case4 has-text-centered">
+           <p class="section-subtitle-label">Case 4</p>
+          <video poster="" id="case4" autoplay controls muted loop playsinline height="100%">
+            <source src="./static/videos/fullbody.mp4" type="video/mp4">
           </video>
         </div>
 
@@ -471,12 +471,47 @@
 <section class="hero teaser">
   <div class="container is-max-desktop">
     <div class="hero-body">
-      <video id="teaser" autoplay muted loop playsinline height="100%">
-        <source src="./static/videos/teaser.mp4" type="video/mp4">
-      </video>
-      <h2 class="subtitle has-text-centered">
-        GeoDiff3D: Self-Supervised 3D Scene Generation with Geometry-Constrained 2D Diffusion Guidance
-      </h2>
+      
+      <div class="columns is-centered has-text-centered">
+        
+        <div class="column is-3">
+          <div class="video-compare-container" style="min-height: auto; margin-bottom: 10px;">
+            <video autoplay muted loop playsinline style="width:100%; border-radius:6px;">
+              <source src="./static/videos/steve.mp4" type="video/mp4">
+            </video>
+          </div>
+          <p class="section-subtitle-label">Stage 1</p>
+        </div>
+
+        <div class="column is-3">
+          <div class="video-compare-container" style="min-height: auto; margin-bottom: 10px;">
+            <video autoplay muted loop playsinline style="width:100%; border-radius:6px;">
+              <source src="./static/videos/chair-tp.mp4" type="video/mp4">
+            </video>
+          </div>
+          <p class="section-subtitle-label">Stage 2</p>
+        </div>
+
+        <div class="column is-3">
+          <div class="video-compare-container" style="min-height: auto; margin-bottom: 10px;">
+            <video autoplay muted loop playsinline style="width:100%; border-radius:6px;">
+              <source src="./static/videos/shiba.mp4" type="video/mp4">
+            </video>
+          </div>
+          <p class="section-subtitle-label">Stage 3</p>
+        </div>
+
+        <div class="column is-3">
+          <div class="video-compare-container" style="min-height: auto; margin-bottom: 10px;">
+            <video autoplay muted loop playsinline style="width:100%; border-radius:6px;">
+              <source src="./static/videos/shiba.mp4" type="video/mp4">
+            </video>
+          </div>
+          <p class="section-subtitle-label">Stage 4</p>
+        </div>
+
+      </div>
+
     </div>
   </div>
 </section>
@@ -538,6 +573,7 @@
     const title = document.getElementById('comparison-scene-title');
     const container = document.getElementById('comparison-container');
     
+    // 锁定高度
     container.style.height = container.offsetHeight + 'px';
 
     title.innerText = scenes[currentSceneIndex].name;
@@ -546,8 +582,11 @@
     
     videoLeft.load();
     videoRight.load();
-    videoLeft.play();
-    videoRight.play();
+    
+    // 切换后重新绑定同步，并开始播放
+    videoLeft.play().then(() => {
+        videoRight.play();
+    });
 
     setTimeout(() => {
       container.style.height = 'auto';
@@ -555,26 +594,52 @@
   }
 
   // ==========================================
-  // 2. 视频同步逻辑 (Matrix Sync - Enhanced)
+  // 2. 滑动对比视频强制同步 (Slider Sync)
   // ==========================================
-  
-  function syncVideos(columnIndex) {
+  function syncSliderVideos() {
+      const vLeft = document.getElementById('video-left');
+      const vRight = document.getElementById('video-right');
+
+      if(!vLeft || !vRight) return;
+
+      // 基础事件同步
+      vLeft.addEventListener('play', () => { if(vRight.paused) vRight.play(); });
+      vLeft.addEventListener('pause', () => { if(!vRight.paused) vRight.pause(); });
+      vLeft.addEventListener('seeking', () => { vRight.currentTime = vLeft.currentTime; });
+      
+      // 心跳检测，强制拉平时间差
+      setInterval(() => {
+          // 只有当左侧在播放时才强行同步，避免暂停时鬼畜
+          if (!vLeft.paused) {
+              const diff = Math.abs(vLeft.currentTime - vRight.currentTime);
+              // 如果误差超过 0.05 秒 (50ms)
+              if (diff > 0.05) {
+                  vRight.currentTime = vLeft.currentTime;
+              }
+              // 如果左边在放，右边停了，强行播放
+              if (vRight.paused) {
+                  vRight.play();
+              }
+          }
+      }, 50); // 每50ms检查一次，非常高频
+  }
+
+
+  // ==========================================
+  // 3. 矩阵视频同步逻辑 (Matrix Sync)
+  // ==========================================
+  function syncMatrixVideos(columnIndex) {
     const videos = document.querySelectorAll(`.sync-col-${columnIndex}`);
     if (videos.length === 0) return;
 
-    const master = videos[0]; // 将第一行的视频作为主控
+    const master = videos[0]; 
 
-    // 1. 基础事件同步
     master.addEventListener('play', () => {
-      videos.forEach(v => {
-        if (v !== master && v.paused) v.play();
-      });
+      videos.forEach(v => { if (v !== master && v.paused) v.play(); });
     });
 
     master.addEventListener('pause', () => {
-      videos.forEach(v => {
-        if (v !== master && !v.paused) v.pause();
-      });
+      videos.forEach(v => { if (v !== master && !v.paused) v.pause(); });
     });
 
     master.addEventListener('ended', () => {
@@ -588,14 +653,11 @@
       });
     });
 
-    // 2. 强制同步循环 (Heartbeat Check)
-    // 每200毫秒检查一次，如果从视频偏差超过0.15秒，强制拉回
     setInterval(() => {
       if (!master.paused) {
         videos.forEach(v => {
           if (v !== master) {
             const diff = Math.abs(v.currentTime - master.currentTime);
-            // 如果误差大于0.15秒，或者主视频在放而从视频停了
             if (diff > 0.15) {
               v.currentTime = master.currentTime;
             }
@@ -608,11 +670,14 @@
     }, 200);
   }
 
-  // 初始化所有列的同步
+  // 初始化
   document.addEventListener('DOMContentLoaded', () => {
-    // 假设有4列场景
+    // 启动滑动对比同步
+    syncSliderVideos();
+
+    // 启动矩阵同步 (假设有4列)
     for (let i = 1; i <= 4; i++) {
-      syncVideos(i);
+      syncMatrixVideos(i);
     }
   });
 
