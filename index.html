@@ -6,7 +6,7 @@
         content="Deformable Neural Radiance Fields creates free-viewpoint portraits (nerfies) from casually captured videos.">
   <meta name="keywords" content="Nerfies, D-NeRF, NeRF">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>GeoDiff3D: Self-Supervised 3D Scene Generation with Geometry-Constrained 2D Diffusion Guidance</title>
+  <title>Nerfies: Deformable Neural Radiance Fields</title>
 
   <script defer src="https://cdn.jsdelivr.net/npm/img-comparison-slider@8/dist/index.js"></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/img-comparison-slider@8/dist/styles.css" />
@@ -36,7 +36,7 @@
 
   <style>
     /* ==========================================
-       1. 滑动条容器与布局 (之前的优化)
+       1. 滑动条容器与布局
        ========================================== */
     img-comparison-slider {
       width: 100%;
@@ -48,13 +48,16 @@
 
     .video-compare-container {
       width: 100%;
-      min-height: 300px; /* 防止视频切换时页面跳动 */
+      min-height: 300px;
       background-color: #f5f5f5; 
       border-radius: 8px;
-      overflow: hidden;
+      /* 这里不能 hidden，否则标签如果溢出会被切掉，
+         但为了圆角通常需要 hidden。
+         由于我们将标签绝对定位在内部，没问题。 */
+      overflow: hidden; 
       box-shadow: 0 10px 40px -10px rgba(0,0,0,0.3);
       line-height: 0;
-      position: relative;
+      position: relative; /* 关键：作为标签定位的父级 */
     }
 
     .video-compare-container video {
@@ -116,6 +119,7 @@
       background: rgba(255, 255, 255, 0.4);
     }
 
+    /* 标签样式 - 修复版：现在是直接定位在容器上，不随 Slider 裁切 */
     .video-label {
       position: absolute;
       top: 20px;
@@ -124,37 +128,38 @@
       font-weight: 700;
       letter-spacing: 1px;
       text-transform: uppercase;
-      background: rgba(0, 0, 0, 0.4);
-      padding: 4px 10px;
+      background: rgba(0, 0, 0, 0.5); /* 稍微加深背景 */
+      padding: 6px 12px;
       border-radius: 4px;
       pointer-events: none;
-      z-index: 20;
-      backdrop-filter: blur(2px);
+      z-index: 99; /* 保证在最顶层 */
+      backdrop-filter: blur(3px);
+      border: 1px solid rgba(255,255,255,0.1);
     }
     
     .label-left { left: 20px; }
     .label-right { right: 20px; }
 
     /* ==========================================
-       2. 新增：对比矩阵样式 (Matrix)
+       2. 对比矩阵样式 (Matrix) - 增加放大镜效果
        ========================================== */
     
     .matrix-container {
       width: 100%;
-      overflow-x: auto; /* 允许小屏幕横向滚动 */
-      padding-bottom: 20px;
+      /* 允许横向滚动 */
+      overflow-x: auto; 
+      /* 增加上下 padding，防止放大的视频被容器边缘裁掉 */
+      padding: 40px 10px; 
     }
 
     .grid-container {
       display: grid;
-      /* 定义5列：第1列是标签(100px)，后4列是视频(平分剩余空间) */
       grid-template-columns: 100px repeat(4, 1fr);
-      gap: 15px; /* 网格间距 */
+      gap: 15px; 
       align-items: center;
-      min-width: 800px; /* 保证在手机上不会挤压，强制出现横向滚动条 */
+      min-width: 800px;
     }
 
-    /* 表头文字 (Scene 1, Scene 2...) */
     .grid-header {
       text-align: center;
       font-family: 'Google Sans', sans-serif;
@@ -164,7 +169,6 @@
       margin-bottom: 5px;
     }
 
-    /* 方法标签文字 (Method A...) */
     .grid-label {
       text-align: right;
       padding-right: 15px;
@@ -174,23 +178,26 @@
       font-size: 0.9rem;
     }
 
-    /* Ours 标签特殊样式 */
     .grid-label.ours {
-      color: #209cee; /* 蓝色高亮 */
+      color: #209cee; 
       font-weight: 800;
       font-size: 1.0rem;
     }
 
-    /* 视频单元格 */
+    /* 视频单元格 - 基础样式 */
     .grid-cell {
       position: relative;
       border-radius: 6px;
-      overflow: hidden;
+      overflow: hidden; /* 保证视频圆角 */
       line-height: 0;
       box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
       background: #000;
-      aspect-ratio: 16 / 9; /* 强制视频比例 */
+      aspect-ratio: 16 / 9;
+      
+      /* 关键：增加平滑过渡效果 */
+      transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+      z-index: 1; /* 默认层级 */
+      transform-origin: center center;
     }
 
     .grid-cell video {
@@ -199,17 +206,26 @@
       object-fit: cover;
     }
 
-    /* 鼠标悬停时的微交互 */
+    /* 鼠标悬停 - 放大效果 (Pop-out) */
     .grid-cell:hover {
-      transform: scale(1.03);
-      box-shadow: 0 8px 16px rgba(0,0,0,0.2);
-      z-index: 10;
+      /* 放大 1.8 倍 */
+      transform: scale(1.8);
+      /* 提高层级，覆盖周围元素 */
+      z-index: 100; 
+      /* 增加明显的阴影，制造悬浮感 */
+      box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+      /* 加一个白边框突出显示 */
+      border: 2px solid #fff;
+      cursor: pointer;
     }
 
-    /* Ours 这一行的视频加个淡淡的框，突出显示 */
     .grid-cell.ours-cell {
       border: 2px solid rgba(32, 156, 238, 0.3);
-      box-shadow: 0 4px 12px rgba(32, 156, 238, 0.15);
+    }
+    
+    /* 当悬停在 Ours 单元格时，边框变回白色，保持一致性 */
+    .grid-cell.ours-cell:hover {
+      border: 2px solid #fff;
     }
 
   </style>
@@ -367,20 +383,23 @@
 
           <div class="column is-10">
             <div class="video-compare-container" id="comparison-container">
+              
+              <span class="video-label label-left">Input</span>
+              <span class="video-label label-right">Ours</span>
+
               <img-comparison-slider>
                 <figure slot="first" class="before" style="margin:0; width:100%;">
                   <video id="video-left" autoplay loop muted playsinline src="./static/videos/render_rgb.mp4"></video>
-                  <span class="video-label label-left">Input</span>
                 </figure>
                 <figure slot="second" class="after" style="margin:0; width:100%;">
                   <video id="video-right" autoplay loop muted playsinline src="./static/videos/render_rgb2.mp4"></video>
-                  <span class="video-label label-right">Ours</span>
                 </figure>
                 <div slot="handle" class="custom-handle">
                    <div class="handle-line"></div>
                    <div class="handle-circle"><i class="fas fa-arrows-alt-h"></i></div>
                 </div>
               </img-comparison-slider>
+
             </div>
           </div>
 
@@ -404,7 +423,7 @@
       <div class="column is-full-width">
         <h2 class="title is-3">Comparisons</h2>
         <div class="content has-text-centered">
-          <p>Full results on 4 different scenes across 6 methods.</p>
+          <p>Hover over the videos to see details.</p>
         </div>
       </div>
     </div>
