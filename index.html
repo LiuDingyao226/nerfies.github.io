@@ -214,6 +214,15 @@
       border: 2px solid #fff;
     }
 
+    /* Carousel Stage Label */
+    .stage-label {
+        font-family: 'Google Sans', sans-serif;
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #4a4a4a;
+        margin-bottom: 8px;
+    }
+
   </style>
 </head>
 <body>
@@ -255,7 +264,7 @@
     <div class="container is-max-desktop">
       <div class="columns is-centered">
         <div class="column has-text-centered">
-          <h1 class="title is-1 publication-title">GeoDiff3D: Self-Supervised 3D Scene Generation with Geometry-Constrained 2D Diffusion Guidance</h1>
+          <h1 class="title is-2 publication-title" style="font-size: 2.4rem;">GeoDiff3D: Self-Supervised 3D Scene Generation with Geometry-Constrained 2D Diffusion Guidance</h1>
           
           <div class="is-size-5 publication-authors">
             <span class="author-block">Haozhi Zhu,</span>
@@ -424,26 +433,35 @@
   <div class="hero-body">
     <div class="container">
       <div id="results-carousel" class="carousel results-carousel">
-        <div class="item item-steve">
-          <video poster="" id="steve" autoplay controls muted loop playsinline height="100%">
+        
+        <div class="item item-stage1 has-text-centered">
+          <p class="stage-label">Stage 1</p>
+          <video poster="" id="stage1" autoplay controls muted loop playsinline height="100%">
             <source src="./static/videos/steve.mp4" type="video/mp4">
           </video>
         </div>
-        <div class="item item-chair-tp">
-          <video poster="" id="chair-tp" autoplay controls muted loop playsinline height="100%">
+        
+        <div class="item item-stage2 has-text-centered">
+           <p class="stage-label">Stage 2</p>
+          <video poster="" id="stage2" autoplay controls muted loop playsinline height="100%">
             <source src="./static/videos/chair-tp.mp4" type="video/mp4">
           </video>
         </div>
-        <div class="item item-shiba">
-          <video poster="" id="shiba" autoplay controls muted loop playsinline height="100%">
+        
+        <div class="item item-stage3 has-text-centered">
+           <p class="stage-label">Stage 3</p>
+          <video poster="" id="stage3" autoplay controls muted loop playsinline height="100%">
             <source src="./static/videos/shiba.mp4" type="video/mp4">
           </video>
         </div>
-        <div class="item item-fullbody">
-          <video poster="" id="fullbody" autoplay controls muted loop playsinline height="100%">
-            <source src="./static/videos/fullbody.mp4" type="video/mp4">
+        
+        <div class="item item-stage4 has-text-centered">
+           <p class="stage-label">Stage 4</p>
+          <video poster="" id="stage4" autoplay controls muted loop playsinline height="100%">
+            <source src="./static/videos/shiba.mp4" type="video/mp4">
           </video>
         </div>
+
       </div>
     </div>
   </div>
@@ -457,7 +475,7 @@
         <source src="./static/videos/teaser.mp4" type="video/mp4">
       </video>
       <h2 class="subtitle has-text-centered">
-        <span class="dnerf">GeoDiff3D</span> turns selfie videos from your phone into free-viewpoint portraits.
+        GeoDiff3D: Self-Supervised 3D Scene Generation with Geometry-Constrained 2D Diffusion Guidance
       </h2>
     </div>
   </div>
@@ -537,7 +555,7 @@
   }
 
   // ==========================================
-  // 2. 视频同步逻辑 (Matrix Sync)
+  // 2. 视频同步逻辑 (Matrix Sync - Enhanced)
   // ==========================================
   
   function syncVideos(columnIndex) {
@@ -546,36 +564,48 @@
 
     const master = videos[0]; // 将第一行的视频作为主控
 
-    // 当主视频循环播放时，强制其他视频重置
-    master.addEventListener('ended', () => {
-      videos.forEach(v => {
-        v.currentTime = 0;
-        v.play();
-      });
-    });
-    
-    // 当主视频开始播放时，其他视频也播放
+    // 1. 基础事件同步
     master.addEventListener('play', () => {
       videos.forEach(v => {
         if (v !== master && v.paused) v.play();
       });
     });
 
-    // 可选：定期校准（每秒检查一次，防止误差积累）
-    // 注意：如果视频本身长度不一致，这个逻辑会导致短视频被强制拉长或跳帧
-    // 假设所有对比方法的视频帧数和时长是严格一致的
-    /*
+    master.addEventListener('pause', () => {
+      videos.forEach(v => {
+        if (v !== master && !v.paused) v.pause();
+      });
+    });
+
+    master.addEventListener('ended', () => {
+      master.currentTime = 0;
+      master.play();
+      videos.forEach(v => {
+        if (v !== master) {
+          v.currentTime = 0;
+          v.play();
+        }
+      });
+    });
+
+    // 2. 强制同步循环 (Heartbeat Check)
+    // 每200毫秒检查一次，如果从视频偏差超过0.15秒，强制拉回
     setInterval(() => {
       if (!master.paused) {
         videos.forEach(v => {
-          // 如果误差超过 0.1秒，强制同步
-          if (Math.abs(v.currentTime - master.currentTime) > 0.1) {
-            v.currentTime = master.currentTime;
+          if (v !== master) {
+            const diff = Math.abs(v.currentTime - master.currentTime);
+            // 如果误差大于0.15秒，或者主视频在放而从视频停了
+            if (diff > 0.15) {
+              v.currentTime = master.currentTime;
+            }
+            if (v.paused) {
+              v.play();
+            }
           }
         });
       }
-    }, 1000);
-    */
+    }, 200);
   }
 
   // 初始化所有列的同步
