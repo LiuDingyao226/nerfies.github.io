@@ -3,10 +3,10 @@
 <head>
   <meta charset="utf-8">
   <meta name="description"
-        content="GeoDiff3D: Self-Supervised 3D Scene Generation with Geometry-Constrained 2D Diffusion Guidance">
+        content="Deformable Neural Radiance Fields creates free-viewpoint portraits (nerfies) from casually captured videos.">
   <meta name="keywords" content="Nerfies, D-NeRF, NeRF">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>GeoDiff3D: Self-Supervised 3D Scene Generation with Geometry-Constrained 2D Diffusion Guidance</title>
+  <title>Nerfies: Deformable Neural Radiance Fields</title>
 
   <script defer src="https://cdn.jsdelivr.net/npm/img-comparison-slider@8/dist/index.js"></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/img-comparison-slider@8/dist/styles.css" />
@@ -36,25 +36,19 @@
 
   <style>
     /* ==========================================
-       自定义样式修改
+       1. 滑动条容器与布局 (之前的优化)
        ========================================== */
-
-    /* 1. 滑动条容器与布局 */
     img-comparison-slider {
       width: 100%;
       height: auto;
       outline: none;
-      /* 隐藏默认的分隔线，完全使用我们自定义的把手 */
       --divider-width: 0px; 
       --default-handle-width: 0px; 
     }
 
     .video-compare-container {
       width: 100%;
-      /* 修复跳动问题的关键：设置一个最小高度或占位背景 */
-      /* 这里设为 200px 仅仅是为了防止瞬间塌缩为0，视频加载后会撑开 */
-      min-height: 300px; 
-      /* 简单的背景色，在视频切换闪烁时不会显示白底 */
+      min-height: 300px; /* 防止视频切换时页面跳动 */
       background-color: #f5f5f5; 
       border-radius: 8px;
       overflow: hidden;
@@ -72,23 +66,21 @@
       padding: 0;
     }
 
-    /* 2. 美化后的中间把手 (Handle) */
+    /* 自定义把手 (Handle) */
     .custom-handle {
-      /* 绝对定位居中 */
       position: absolute;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      pointer-events: none; /* 让鼠标事件穿透，不影响拖拽 */
+      pointer-events: none;
       z-index: 10;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      height: 100%; /* 全高，为了画中间的竖线（如果需要的话）*/
+      height: 100%;
     }
 
-    /* 把手中间的竖线 */
     .handle-line {
       width: 2px;
       height: 100%;
@@ -101,34 +93,29 @@
       z-index: 9;
     }
 
-    /* 把手中间的圆形按钮 */
     .handle-circle {
       width: 48px;
       height: 48px;
       border-radius: 50%;
-      /* 毛玻璃效果 */
       background: rgba(255, 255, 255, 0.25);
       backdrop-filter: blur(6px);
       -webkit-backdrop-filter: blur(6px);
       border: 2px solid rgba(255, 255, 255, 0.9);
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-      
       display: flex;
       align-items: center;
       justify-content: center;
-      z-index: 11; /* 保证在竖线上面 */
+      z-index: 11;
       color: white;
       font-size: 18px;
       transition: transform 0.2s ease, background 0.2s ease;
     }
 
-    /* 悬停时的交互反馈 */
     img-comparison-slider:hover .handle-circle {
       transform: scale(1.1);
       background: rgba(255, 255, 255, 0.4);
     }
 
-    /* 3. 标签样式 (Input / Ours) */
     .video-label {
       position: absolute;
       top: 20px;
@@ -137,7 +124,7 @@
       font-weight: 700;
       letter-spacing: 1px;
       text-transform: uppercase;
-      background: rgba(0, 0, 0, 0.4); /* 半透明黑底，增加对比度 */
+      background: rgba(0, 0, 0, 0.4);
       padding: 4px 10px;
       border-radius: 4px;
       pointer-events: none;
@@ -147,6 +134,83 @@
     
     .label-left { left: 20px; }
     .label-right { right: 20px; }
+
+    /* ==========================================
+       2. 新增：对比矩阵样式 (Matrix)
+       ========================================== */
+    
+    .matrix-container {
+      width: 100%;
+      overflow-x: auto; /* 允许小屏幕横向滚动 */
+      padding-bottom: 20px;
+    }
+
+    .grid-container {
+      display: grid;
+      /* 定义5列：第1列是标签(100px)，后4列是视频(平分剩余空间) */
+      grid-template-columns: 100px repeat(4, 1fr);
+      gap: 15px; /* 网格间距 */
+      align-items: center;
+      min-width: 800px; /* 保证在手机上不会挤压，强制出现横向滚动条 */
+    }
+
+    /* 表头文字 (Scene 1, Scene 2...) */
+    .grid-header {
+      text-align: center;
+      font-family: 'Google Sans', sans-serif;
+      font-weight: 700;
+      color: #363636;
+      font-size: 1.1rem;
+      margin-bottom: 5px;
+    }
+
+    /* 方法标签文字 (Method A...) */
+    .grid-label {
+      text-align: right;
+      padding-right: 15px;
+      font-family: 'Google Sans', sans-serif;
+      font-weight: 600;
+      color: #666;
+      font-size: 0.9rem;
+    }
+
+    /* Ours 标签特殊样式 */
+    .grid-label.ours {
+      color: #209cee; /* 蓝色高亮 */
+      font-weight: 800;
+      font-size: 1.0rem;
+    }
+
+    /* 视频单元格 */
+    .grid-cell {
+      position: relative;
+      border-radius: 6px;
+      overflow: hidden;
+      line-height: 0;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      background: #000;
+      aspect-ratio: 16 / 9; /* 强制视频比例 */
+    }
+
+    .grid-cell video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* 鼠标悬停时的微交互 */
+    .grid-cell:hover {
+      transform: scale(1.03);
+      box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+      z-index: 10;
+    }
+
+    /* Ours 这一行的视频加个淡淡的框，突出显示 */
+    .grid-cell.ours-cell {
+      border: 2px solid rgba(32, 156, 238, 0.3);
+      box-shadow: 0 4px 12px rgba(32, 156, 238, 0.15);
+    }
 
   </style>
 </head>
@@ -295,54 +359,105 @@
         <h3 class="title is-5 has-text-centered" id="comparison-scene-title">Scene 1</h3>
 
         <div class="columns is-vcentered is-mobile">
-          
           <div class="column is-1 has-text-centered">
             <button class="button is-ghost is-large" type="button" onclick="nextScene(-1)">
-              <span class="icon is-medium">
-                <i class="fas fa-chevron-left fa-lg"></i>
-              </span>
+              <span class="icon is-medium"><i class="fas fa-chevron-left fa-lg"></i></span>
             </button>
           </div>
 
           <div class="column is-10">
             <div class="video-compare-container" id="comparison-container">
               <img-comparison-slider>
-                
                 <figure slot="first" class="before" style="margin:0; width:100%;">
                   <video id="video-left" autoplay loop muted playsinline src="./static/videos/render_rgb.mp4"></video>
                   <span class="video-label label-left">Input</span>
                 </figure>
-                
                 <figure slot="second" class="after" style="margin:0; width:100%;">
                   <video id="video-right" autoplay loop muted playsinline src="./static/videos/render_rgb2.mp4"></video>
                   <span class="video-label label-right">Ours</span>
                 </figure>
-                
                 <div slot="handle" class="custom-handle">
                    <div class="handle-line"></div>
-                   <div class="handle-circle">
-                     <i class="fas fa-arrows-alt-h"></i>
-                   </div>
+                   <div class="handle-circle"><i class="fas fa-arrows-alt-h"></i></div>
                 </div>
-
               </img-comparison-slider>
             </div>
           </div>
 
           <div class="column is-1 has-text-centered">
             <button class="button is-ghost is-large" type="button" onclick="nextScene(1)">
-              <span class="icon is-medium">
-                <i class="fas fa-chevron-right fa-lg"></i>
-              </span>
+              <span class="icon is-medium"><i class="fas fa-chevron-right fa-lg"></i></span>
             </button>
           </div>
-
         </div>
 
       </div>
     </div>
   </div>
 </section>
+
+
+<section class="section">
+  <div class="container is-max-desktop">
+    
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-full-width">
+        <h2 class="title is-3">Comparisons</h2>
+        <div class="content has-text-centered">
+          <p>Full results on 4 different scenes across 6 methods.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="matrix-container">
+      <div class="grid-container">
+        
+        <div></div> <div class="grid-header">Scene 1</div>
+        <div class="grid-header">Scene 2</div>
+        <div class="grid-header">Scene 3</div>
+        <div class="grid-header">Scene 4</div>
+
+        <div class="grid-label">Method A</div>
+        <div class="grid-cell"><video autoplay loop muted playsinline src="./static/videos/render_rgb.mp4"></video></div>
+        <div class="grid-cell"><video autoplay loop muted playsinline src="./static/videos/render_rgb.mp4"></video></div>
+        <div class="grid-cell"><video autoplay loop muted playsinline src="./static/videos/render_rgb.mp4"></video></div>
+        <div class="grid-cell"><video autoplay loop muted playsinline src="./static/videos/render_rgb.mp4"></video></div>
+
+        <div class="grid-label">Method B</div>
+        <div class="grid-cell"><video autoplay loop muted playsinline src="./static/videos/render_rgb.mp4"></video></div>
+        <div class="grid-cell"><video autoplay loop muted playsinline src="./static/videos/render_rgb.mp4"></video></div>
+        <div class="grid-cell"><video autoplay loop muted playsinline src="./static/videos/render_rgb.mp4"></video></div>
+        <div class="grid-cell"><video autoplay loop muted playsinline src="./static/videos/render_rgb.mp4"></video></div>
+
+        <div class="grid-label">Method C</div>
+        <div class="grid-cell"><video autoplay loop muted playsinline src="./static/videos/render_rgb.mp4"></video></div>
+        <div class="grid-cell"><video autoplay loop muted playsinline src="./static/videos/render_rgb.mp4"></video></div>
+        <div class="grid-cell"><video autoplay loop muted playsinline src="./static/videos/render_rgb.mp4"></video></div>
+        <div class="grid-cell"><video autoplay loop muted playsinline src="./static/videos/render_rgb.mp4"></video></div>
+
+        <div class="grid-label">Method D</div>
+        <div class="grid-cell"><video autoplay loop muted playsinline src="./static/videos/render_rgb.mp4"></video></div>
+        <div class="grid-cell"><video autoplay loop muted playsinline src="./static/videos/render_rgb.mp4"></video></div>
+        <div class="grid-cell"><video autoplay loop muted playsinline src="./static/videos/render_rgb.mp4"></video></div>
+        <div class="grid-cell"><video autoplay loop muted playsinline src="./static/videos/render_rgb.mp4"></video></div>
+
+        <div class="grid-label">Method E</div>
+        <div class="grid-cell"><video autoplay loop muted playsinline src="./static/videos/render_rgb.mp4"></video></div>
+        <div class="grid-cell"><video autoplay loop muted playsinline src="./static/videos/render_rgb.mp4"></video></div>
+        <div class="grid-cell"><video autoplay loop muted playsinline src="./static/videos/render_rgb.mp4"></video></div>
+        <div class="grid-cell"><video autoplay loop muted playsinline src="./static/videos/render_rgb.mp4"></video></div>
+
+        <div class="grid-label ours">Ours</div>
+        <div class="grid-cell ours-cell"><video autoplay loop muted playsinline src="./static/videos/render_rgb2.mp4"></video></div>
+        <div class="grid-cell ours-cell"><video autoplay loop muted playsinline src="./static/videos/render_rgb2.mp4"></video></div>
+        <div class="grid-cell ours-cell"><video autoplay loop muted playsinline src="./static/videos/render_rgb2.mp4"></video></div>
+        <div class="grid-cell ours-cell"><video autoplay loop muted playsinline src="./static/videos/render_rgb2.mp4"></video></div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
 
 <script>
   // 场景数据
@@ -382,12 +497,10 @@
   let currentSceneIndex = 0;
 
   function nextScene(direction) {
-    // 1. 移除按钮焦点，防止浏览器默认的焦点滚动行为
     if (document.activeElement instanceof HTMLElement) {
       document.activeElement.blur();
     }
 
-    // 2. 计算新索引
     currentSceneIndex += direction;
     if (currentSceneIndex < 0) {
       currentSceneIndex = scenes.length - 1;
@@ -395,13 +508,12 @@
       currentSceneIndex = 0;
     }
 
-    // 3. 更新内容
     const videoLeft = document.getElementById('video-left');
     const videoRight = document.getElementById('video-right');
     const title = document.getElementById('comparison-scene-title');
-
-    // 预先保留容器高度（可选优化，主要靠CSS min-height解决）
     const container = document.getElementById('comparison-container');
+    
+    // 锁定高度防止跳动
     container.style.height = container.offsetHeight + 'px';
 
     title.innerText = scenes[currentSceneIndex].name;
@@ -413,7 +525,6 @@
     videoLeft.play();
     videoRight.play();
 
-    // 稍微延迟后释放高度限制（让视频自适应）
     setTimeout(() => {
       container.style.height = 'auto';
     }, 500);
